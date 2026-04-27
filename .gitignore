@@ -1,0 +1,8 @@
+node_modules
+.env
+.DS_STORE
+/src/generated/prisma
+**.js
+**.d.ts
+**.map
+/src/generated/prisma

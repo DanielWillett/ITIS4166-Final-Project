@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+	provider = "prisma-client"
+	output   = "../src/generated/prisma"
+}
+
+datasource db {
+	provider = "postgresql"
+}
+
+model User {
+	id					Int				@id @default(autoincrement())
+	username			String			@unique
+	passwordHash		String			@map("password_hash")
+	createdByUserId		Int? 			@map("created_by")
+	createdBy			User?			@relation("UserCreator", fields: [ createdByUserId ], references: [ id ])
+	users 				User[] 			@relation("UserCreator")
+	createdAt			DateTime		@map("created_at")
+
+	items 				Item[]
+	categories 			ItemCategory[]
+	stockItems 			StockItem[]
+	stockItemRecords	StockItemRecord[]
+
+	@@map("posts")
+}
+
+model Item {
+	id					Int				@id @default(autoincrement())
+	name				String
+	description			String
+	createdByUserId		Int? 			@map("created_by")
+	createdBy			User?			@relation(fields: [ createdByUserId ], references: [ id ])
+	createdAt			DateTime		@map("created_at")
+
+	stockItems			StockItem[]
+
+	@@index(fields: [ name ])
+	@@map("items")
+}
+
+model ItemCategory {
+	id					Int				@id @default(autoincrement())
+	name				String
+	parentId			Int				@map("parent")
+	parent				ItemCategory?	@relation("CategoryParent", fields: [ parentId ], references: [ id ])
+	children			ItemCategory[] 	@relation("CategoryParent")
+	createdByUserId		Int? 			@map("created_by")
+	createdBy			User?			@relation(fields: [ createdByUserId ], references: [ id ])
+	createdAt			DateTime		@map("created_at")
+
+	@@index(fields: [ name ])
+	@@index(fields: [ parentId ])
+	@@map("item-categories")
+}
+
+model StockItem {
+	id					Int				@id @default(autoincrement())
+	itemId				Int
+	item				Item			@relation(fields: [ itemId ], references: [ id ])
+	quantity			Decimal
+	manufacturer		String?
+	vendor				String?
+	url					String?
+	location			String
+	createdByUserId		Int? 			@map("created_by")
+	createdBy			User?			@relation(fields: [ createdByUserId ], references: [ id ])
+	createdAt			DateTime		@map("created_at")
+
+	records				StockItemRecord[]
+
+	@@index(fields: [ itemId ])
+	@@map("stock-items")
+}
+
+model StockItemRecord {
+	id					Int				@id @default(autoincrement())
+	stockItemId			Int				@map("stock_item")
+	stockItem			StockItem		@relation(fields: [ stockItemId ], references: [ id ])
+	fieldId				Int				@map("field_id")
+	description			String
+	oldValue			String			@map("old_value")
+	userId				Int?			@map("user_id")
+	user				User?			@relation(fields: [ userId ], references: [ id ])
+	timestamp			DateTime
+
+	@@index(fields: [ stockItemId ])
+	@@map("stock-item-records")
+}
