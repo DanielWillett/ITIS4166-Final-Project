@@ -1,24 +1,23 @@
 import type { DefaultArgs } from "@prisma/client/runtime/client";
 
 import prisma from '../db.js';
-import type { UserQueryOptions } from "../types/userQueryOptions.js";
-import type User from "../types/user.js";
+import type { ItemCategoryQueryOptions } from "../types/itemCategoryQueryOptions.js";
+import type ItemCategory from "../types/ItemCategory.js";
 import { Prisma } from "../generated/prisma/index.js";
 import HttpError from "../errors/NotFoundError.js";
 
-export interface UserUpdateParameters {
-    firstName: string | undefined,
-    lastName: string | undefined,
-    role: "read" | "write" | "admin" | undefined
+export interface CategoryUpdateParameters {
+    name: string | undefined,
+    parent: number | null | undefined
 }
 
 /**
- * Query the entire user list.
+ * Query the entire item category list.
  * @param options Query filters and sort options.
- * @returns An array of found users.
+ * @returns An array of found item categories.
  */
-export async function readMany(options: UserQueryOptions) : Promise<User[]> {
-  let conditions : Prisma.UserWhereInput = {};
+export async function readMany(options: ItemCategoryQueryOptions) : Promise<ItemCategory[]> {
+  let conditions : Prisma.ItemCategoryWhereInput = {};
 
   if (options.search) {
     if (!options.searchBy || options.searchBy === "realName") {
@@ -37,10 +36,10 @@ export async function readMany(options: UserQueryOptions) : Promise<User[]> {
       }
     }
     else if (options.searchBy === "createdBy") {
-      // search by creating user
+      // search by creating ItemCategory
       const createdById = parseInt(options.search);
       if (!isNaN(createdById)) {
-        conditions.createdByUserId = createdById;
+        conditions.createdByItemCategoryId = createdById;
       } else {
         throw new HttpError("Expected integer value for createdBy search parameter.", 400);
       }
@@ -50,7 +49,7 @@ export async function readMany(options: UserQueryOptions) : Promise<User[]> {
     }
   }
 
-  let query: Prisma.UserFindManyArgs<DefaultArgs> = {
+  let query: Prisma.ItemCategoryFindManyArgs<DefaultArgs> = {
     where: conditions,
     omit: { passwordHash: true }
   };
@@ -66,58 +65,40 @@ export async function readMany(options: UserQueryOptions) : Promise<User[]> {
     query.skip = options.offset;
   }
 
-  const models = await prisma.user.findMany(query);
-  return models.map(createUserFromModel);
+  const models = await prisma.ItemCategory.findMany(query);
+  return models.map(createItemCategoryFromModel);
 };
 
 /**
- * Get a user by their user ID.
- * @param id The primary key of the user to find.
- * @returns The user, or null if the user was not found.
+ * Get an item category by their ID.
+ * @param id The primary key of the item category to find.
+ * @returns The item category, or null if it wasn't found.
  */
-export async function readById(id: number) : Promise<User | null> {
-  const model = await prisma.user.findFirst({ where: { id } });
+export async function readById(id: number) : Promise<ItemCategory | null> {
+  const model = await prisma.itemCategory.findFirst({ where: { id } });
   if (!model) {
     return null;
   }
 
-  return createUserFromModel(model);
+  return createItemCategoryFromModel(model);
 };
 
 /**
- * Get a user and their password hash by their username.
- * @param username The username of the user to find.
- * @returns The user and their bcrypt password hash, or null if the user was not found.
+ * Create a new item category with the given information.
+ * @param category Item category information.
+ * @returns The created item category.
  */
-export async function readByUsername(username: string) : Promise<{ user: User, passwordHash: string } | null> {
-  const model = await prisma.user.findFirst({ where: { username } });
-  if (!model) {
-    return null;
-  }
-
-  const user = createUserFromModel(model);
-  return { user, passwordHash: model.passwordHash };
-};
-
-/**
- * Create a new user with the given information.
- * @param user User information.
- * @param passwordHash bcrypt hash of the user's password.
- * @returns The created user.
- */
-export async function create(user: User, passwordHash: string) : Promise<User> {
+export async function create(category: ItemCategory) : Promise<ItemCategory> {
   try {
-    const u = await prisma.user.create({
+    const u = await prisma.itemCategory.create({
       data: {
-        createdAt: user.createdAt,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        username: user.username,
-        passwordHash: passwordHash,
-        createdByUserId: user.createdById,
-        role: user.role
-      },
-      omit: { passwordHash: true }
+        createdAt: category.createdAt,
+        firstName: category.firstName,
+        lastName: category.lastName,
+        ItemCategoryname: category.ItemCategoryname,
+        createdByItemCategoryId: category.createdById,
+        role: category.role
+      }
     });
 
     return {
@@ -125,8 +106,8 @@ export async function create(user: User, passwordHash: string) : Promise<User> {
       createdAt: u.createdAt,
       firstName: u.firstName,
       lastName: u.lastName,
-      username: u.username,
-      createdById: u.createdByUserId,
+      ItemCategoryname: u.ItemCategoryname,
+      createdById: u.createdByItemCategoryId,
       role: u.role
     };
 
@@ -137,11 +118,11 @@ export async function create(user: User, passwordHash: string) : Promise<User> {
 
     if (err.code === "P2002") {
       // unique constraint error
-      throw new HttpError("Username already used.", 409);
+      throw new HttpError("ItemCategoryname already used.", 409);
     }
     else if (err.code === "P2004") {
       // constraint error
-      throw new HttpError("Invalid createdBy User ID.", 400);
+      throw new HttpError("Invalid createdBy ItemCategory ID.", 400);
     }
     else {
       throw err;
@@ -150,9 +131,9 @@ export async function create(user: User, passwordHash: string) : Promise<User> {
   }
 };
 
-export async function update(userId: number, update: UserUpdateParameters) : Promise<User | null> {
+export async function update(ItemCategoryId: number, update: CategoryUpdateParameters) : Promise<ItemCategory | null> {
   try {
-    let updateData : Prisma.UserUpdateInput = { };
+    let updateData : Prisma.ItemCategoryUpdateInput = { };
     if (update.firstName !== undefined) {
       updateData.firstName = update.firstName;
     }
@@ -163,13 +144,13 @@ export async function update(userId: number, update: UserUpdateParameters) : Pro
       updateData.role = update.role;
     }
     
-    const model = await prisma.user.update({
-      where: { id: userId },
+    const model = await prisma.ItemCategory.update({
+      where: { id: ItemCategoryId },
       data: updateData,
       omit: { passwordHash: true }
     });
 
-    return createUserFromModel(model);
+    return createItemCategoryFromModel(model);
   }
   catch (err) {
     if (!(err instanceof Prisma.PrismaClientKnownRequestError) || err.code !== "P2025") {
@@ -181,13 +162,13 @@ export async function update(userId: number, update: UserUpdateParameters) : Pro
   }
 }
 
-function createUserFromModel(u: any) : User {
+function createItemCategoryFromModel(u: any) : ItemCategory {
   return {
       id: u.id,
       firstName: u.firstName,
       lastName: u.lastName,
-      username: u.username,
-      createdById: u.createdByUserId,
+      ItemCategoryname: u.ItemCategoryname,
+      createdById: u.createdByItemCategoryId,
       createdAt: u.createdAt,
       role: u.role
   };

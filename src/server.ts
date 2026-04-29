@@ -28,11 +28,15 @@ app.use((_, __, next) => {
 // handle all uncaught errors
 app.use((err: Error, _:  express.Request, res:  express.Response, __: express.NextFunction) => {
     if (err instanceof HttpError) {
-        res.status(err.httpCode).json({ error: err.message });
+        if (err.httpCode === 400) {
+            res.status(400).json({ errors: [ err.message ] });
+        } else {
+            res.status(err.httpCode).json({ error: err.message });
+        }
     }
     else {
         console.error(err);
-        res.status(500).json(err.message ?? "Internal Server Error");
+        res.status(500).json({ error: err.message ?? "Internal Server Error" });
     }
 });
 

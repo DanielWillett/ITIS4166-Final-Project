@@ -1,43 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
 
-import type { UserQueryOptions, SearchableProperty, SortableProperty } from "../types/userQueryOptions.js";
+import type { UserQueryOptions } from "../types/userQueryOptions.js";
 import * as userService from "../services/userService.js";
 import HttpError from "../errors/NotFoundError.js";
+import { parseQueryOptions } from "../types/queryOptions.js";
 
 export async function getAllUsersHandler(req : Request, res : Response) : Promise<void> {
-    let offset : number | undefined = undefined, limit : number | undefined = undefined;
-
-    if (req.query.offset) {
-        offset = parseInt(req.query.offset.toString());
-        if (isNaN(offset) || offset <= 0) offset = undefined;
-    }
-
-    if (req.query.limit) {
-        limit = parseInt(req.query.limit.toString());
-        if (isNaN(limit) || limit < 0) limit = undefined;
-    }
-
-    let searchBy : null | string = null;
-    if (req.query.searchBy) {
-        searchBy = req.query.searchBy.toString();
-    }
-
-    let search = req.query.search?.toString();
-    
-    let orderBy : null | string = null;
-    if (req.query.orderBy) {
-        orderBy = req.query.orderBy.toString();
-    }
-
-    const options : UserQueryOptions = {
-        sortDescending: req.query.sort === "desc",
-        limit: limit,
-        offset: offset,
-        searchBy: searchBy as (undefined | SearchableProperty),
-        orderBy: orderBy as (undefined | SortableProperty),
-        search: search
-    };
-
+    const options : UserQueryOptions = parseQueryOptions(req)
     const results = await userService.getUsers(options);
     res.status(200).json(results);
 };

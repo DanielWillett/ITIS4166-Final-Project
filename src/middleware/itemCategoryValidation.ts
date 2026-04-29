@@ -2,7 +2,7 @@ import { body, oneOf, param, query } from "express-validator";
 
 import { handleValidationErrors } from "./handleValidationErrors.js";
 
-export const validateGetAllUsers =
+export const validateGetAllCategories =
 [
     query("offset")
         .optional()
@@ -16,8 +16,8 @@ export const validateGetAllUsers =
 
     query("searchBy")
         .optional()
-        .isIn([ "username", "firstName", "lastName", "realName", "createdBy", "role" ])
-        .withMessage("'searchBy' parameter must be a valid property: [ username, firstName, lastName, realName, createdBy, role ]."),
+        .isIn([ "name", "parent", "createdBy" ])
+        .withMessage("'searchBy' parameter must be a valid property: [ name, parent, createdBy ]."),
         
     query("search")
         .optional()
@@ -29,8 +29,8 @@ export const validateGetAllUsers =
     
     query("orderBy")
         .optional()
-        .isIn([ "id", "username", "firstName", "lastName", "createdBy", "createdAt", "role" ])
-        .withMessage("'orderBy' parameter must be a valid property: [ id, username, firstName, lastName, createdBy, createdAt, role ]."),
+        .isIn([ "id", "name", "parent", "createdBy", "createdAt" ])
+        .withMessage("'orderBy' parameter must be a valid property: [ id, name, parent, createdBy, createdAt ]."),
 
     query("sort")
         .optional()
@@ -41,7 +41,23 @@ export const validateGetAllUsers =
     handleValidationErrors
 ];
 
-export const validateGetUserById =
+export const validateCreateCategory =
+[
+    body("name")
+        .trim()
+        .escape()
+        .isString()
+        .withMessage("'name' parameter must be a non-empty string value."),
+
+    body("parent")
+        .optional({ values: "null" })
+        .isInt({ min: 1 })
+        .withMessage("'parent' parameter must be a valid integer if included."),
+
+    handleValidationErrors
+];
+
+export const validateGetCategoryById =
 [
     param("id")
         .trim()
@@ -52,7 +68,7 @@ export const validateGetUserById =
     handleValidationErrors
 ];
 
-export const validateUpdateUser =
+export const validateUpdateCategory =
 [
     param("id")
         .trim()
@@ -62,34 +78,27 @@ export const validateUpdateUser =
 
     oneOf(
         [
-            body("firstName").exists({ values: "falsy" }),
-            body("lastName").exists({ values: "falsy" }),
-            body("role").exists({ values: "falsy" }),
+            body("name").exists({ values: "falsy" }),
+            body("parent").exists({ values: "undefined" }),
         ],
         {
-            message: "At least one of the following fields must be updated: [ firstName, lastName, role ]."
+            message: "At least one of the following fields must be updated: [ name, parent ]."
         },
     ),
 
-    body("firstName")
+    body("name")
         .optional()
         .trim()
         .escape()
         .isString()
-        .withMessage("'firstName' parameter must be a non-empty string value."),
+        .withMessage("'name' parameter must be a non-empty string value."),
 
-    body("lastName")
-        .optional()
-        .trim()
-        .escape()
-        .isString()
-        .withMessage("'lastName' parameter must be a non-empty string value."),
-
-    body("role")
-        .optional()
-        .toLowerCase()
-        .isIn([ "read", "write", "admin" ])
-        .withMessage("'role' parameter must be one of: [ read, write, admin ]."),
+    body("parent")
+        .isInt({ min: 1 })
+        .optional({ values: "null" })
+        .withMessage("'parent' parameter must be a valid integer or 'null'."),
 
     handleValidationErrors
 ];
+
+export const validateDeleteCategory = validateGetCategoryById;
