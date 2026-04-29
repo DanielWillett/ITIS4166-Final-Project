@@ -6,11 +6,9 @@
     "target": "ES2023",
     "esModuleInterop": true,
     "ignoreDeprecations": "6.0",
-    "types": [],
-    // For nodejs:
-    // "lib": ["esnext"],
-    // "types": ["node"],
-    // and npm install -D @types/node
+    "lib": ["esnext"],
+    //"types": ["node"],
+    "typeRoots": [ "./types" ],
 
     // Other Outputs
     "sourceMap": true,
@@ -38,6 +36,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "include": ["src/**/*.ts", "prisma/seed.ts", "types/**/*.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts", "src/generated/prisma/**/*.ts"]
 }

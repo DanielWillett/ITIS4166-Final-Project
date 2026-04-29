@@ -4,7 +4,8 @@
   "description": "Inventory backend.",
   "main": "./src/server.ts",
   "scripts": {
-    "dev": "npx tsc && node --env-file=.env --watch src/server.js"
+    "dev": "npx tsc && node --env-file=.env --watch src/server.js",
+    "seed": "npx tsc && node --env-file=.env prisma/seed.js"
   },
   "exports": {
     ".": "./src/server.ts"
@@ -15,9 +16,14 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
+    "@types/express-validator": "^2.20.33",
+    "@types/js-yaml": "^4.0.9",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.6.0",
     "@types/pg": "^8.20.0",
+    "@types/swagger-ui-express": "^4.1.8",
     "dotenv": "^17.4.2",
     "prisma": "^7.8.0",
     "tsx": "^4.21.0",
@@ -26,10 +32,11 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
-    "@types/js-yaml": "^4.0.9",
-    "@types/swagger-ui-express": "^4.1.8",
+    "bcrypt": "^6.0.0",
     "express": "^5.2.1",
+    "express-validator": "^7.3.2",
     "js-yaml": "^4.1.1",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.20.0",
     "swagger-ui-express": "^5.0.1"
   }
