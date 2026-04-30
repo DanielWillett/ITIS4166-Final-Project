@@ -90,15 +90,18 @@ export async function readById(id: number) : Promise<ItemCategory | null> {
  */
 export async function create(category: ItemCategory) : Promise<ItemCategory> {
   try {
+    const data : Prisma.ItemCategoryUncheckedCreateInput = {
+      createdAt: category.createdAt,
+      name: category.name,
+      createdByUserId: category.createdById,
+      parentId: undefined // todo: migrate
+    };
+
+    if (category.parentId !== null) {
+      data.parentId = category.parentId;
+    }
     const u = await prisma.itemCategory.create({
-      data: {
-        createdAt: category.createdAt,
-        firstName: category.firstName,
-        lastName: category.lastName,
-        ItemCategoryname: category.ItemCategoryname,
-        createdByItemCategoryId: category.createdById,
-        role: category.role
-      }
+      data: data
     });
 
     return {
@@ -131,23 +134,23 @@ export async function create(category: ItemCategory) : Promise<ItemCategory> {
   }
 };
 
-export async function update(ItemCategoryId: number, update: CategoryUpdateParameters) : Promise<ItemCategory | null> {
+export async function update(categoryId: number, update: CategoryUpdateParameters) : Promise<ItemCategory | null> {
   try {
     let updateData : Prisma.ItemCategoryUpdateInput = { };
-    if (update.firstName !== undefined) {
-      updateData.firstName = update.firstName;
+    if (update.name !== undefined) {
+      updateData.name = update.name;
     }
-    if (update.lastName !== undefined) {
-      updateData.lastName = update.lastName;
-    }
-    if (update.role !== undefined) {
-      updateData.role = update.role;
+    if (update.parent !== undefined) {
+      if (update.parent !== null) {
+        updateData.parent = { connect: { id: update.parent } };
+      } else {
+        updateData.parent = { disconnect: true };
+      }
     }
     
-    const model = await prisma.ItemCategory.update({
-      where: { id: ItemCategoryId },
-      data: updateData,
-      omit: { passwordHash: true }
+    const model = await prisma.itemCategory.update({
+      where: { id: categoryId },
+      data: updateData
     });
 
     return createItemCategoryFromModel(model);
@@ -165,11 +168,9 @@ export async function update(ItemCategoryId: number, update: CategoryUpdateParam
 function createItemCategoryFromModel(u: any) : ItemCategory {
   return {
       id: u.id,
-      firstName: u.firstName,
-      lastName: u.lastName,
-      ItemCategoryname: u.ItemCategoryname,
-      createdById: u.createdByItemCategoryId,
+      name: u.name,
+      parentId: u.parentId,
       createdAt: u.createdAt,
-      role: u.role
+      createdById: u.createdByItemCategoryId
   };
 }

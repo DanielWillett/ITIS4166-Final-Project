@@ -55,7 +55,7 @@ model Item {
 model ItemCategory {
 	id					Int				@id @default(autoincrement())
 	name				String
-	parentId			Int				@map("parent")
+	parentId			Int?			@map("parent")
 	parent				ItemCategory?	@relation("CategoryParent", fields: [ parentId ], references: [ id ])
 	children			ItemCategory[] 	@relation("CategoryParent")
 	createdByUserId		Int? 			@map("created_by")
