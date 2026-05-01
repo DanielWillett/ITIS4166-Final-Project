@@ -22,6 +22,7 @@ export async function readMany(options: UserQueryOptions) : Promise<User[]> {
 
   if (options.search) {
     if (!options.searchBy || options.searchBy === "realName") {
+      // search by real name
       const nameIndex = options.search.indexOf(" ");
       if (nameIndex > 0 && nameIndex < options.search.length - 1) {
         const firstName = options.search.substring(0, nameIndex).trim();
@@ -35,7 +36,16 @@ export async function readMany(options: UserQueryOptions) : Promise<User[]> {
         ];
       }
     }
-    else {
+    else if (options.searchBy === "createdBy") {
+      // search by creating user
+      const createdById = parseInt(options.search);
+      if (!isNaN(createdById)) {
+        conditions.createdByUserId = createdById;
+      } else {
+        throw new HttpError("Expected integer value for createdBy search parameter.", 400);
+      }
+    } else {
+      // search by other field
       conditions[options.searchBy] = { contains: options.search, mode: "insensitive" };
     }
   }
@@ -110,15 +120,7 @@ export async function create(user: User, passwordHash: string) : Promise<User> {
       omit: { passwordHash: true }
     });
 
-    return {
-      id: u.id,
-      createdAt: u.createdAt,
-      firstName: u.firstName,
-      lastName: u.lastName,
-      username: u.username,
-      createdById: u.createdByUserId,
-      role: u.role
-    };
+    return createUserFromModel(u);
 
   } catch (err) {
     if (!(err instanceof Prisma.PrismaClientKnownRequestError)) {
@@ -140,6 +142,12 @@ export async function create(user: User, passwordHash: string) : Promise<User> {
   }
 };
 
+/**
+ * Update properties in a user.
+ * @param categoryId Primary key of the user to update.
+ * @param update Properties to update.
+ * @returns The updated user, or null if it couldn't be found.
+ */
 export async function update(userId: number, update: UserUpdateParameters) : Promise<User | null> {
   try {
     let updateData : Prisma.UserUpdateInput = { };
@@ -169,7 +177,17 @@ export async function update(userId: number, update: UserUpdateParameters) : Pro
     // P2025 = not found error
     return null;
   }
-}
+};
+
+/**
+ * Delete a user.
+ * @param userId Primary key of the user to delete.
+ * @returns Whether or not the user was found and deleted.
+ */
+export async function remove(userId: number) : Promise<boolean> {
+  const { count } = await prisma.user.deleteMany({ where: { id: userId } });
+  return count > 0;
+};
 
 function createUserFromModel(u: any) : User {
   return {

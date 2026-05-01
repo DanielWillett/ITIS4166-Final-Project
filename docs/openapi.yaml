@@ -43,6 +43,10 @@ components:
           "minimum": 1,
           "example": "2026-10-05T14:48:00.000Z",
           "readOnly": true
+        },
+        "role": {
+          "type": "string",
+          "enum": [ "read", "write", "admin" ]
         }
       }
     }
@@ -60,6 +64,43 @@ components:
         "username": {
           "type": "string",
           "example": "username123"
+        },
+        "password": {
+          "type": "string",
+          "example": "password123"
+        },
+        "role": {
+          "type": "string",
+          "enum": [ "read", "write", "admin" ]
+        }
+      }
+    }
+    ItemCategory: {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "example": 2,
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "example": "Hardware"
+        },
+        "parent": {
+          "type": "integer",
+          "example": 1
+        },
+        "createdBy": {
+          "type": [ "integer", "null" ],
+          "example": 1,
+          "readOnly": true
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date",
+          "example": "2026-10-05T14:48:00.000Z",
+          "readOnly": true
         }
       }
     }
@@ -72,6 +113,15 @@ components:
       schema: {
         "type": "integer",
         "example": 1
+      }
+    ItemCategoryId:
+      name: id
+      in: path
+      required: true
+      description: Item Category ID
+      schema: {
+        "type": "integer",
+        "example": 2
       }
   responses:
     InvalidUserInput:
@@ -162,10 +212,12 @@ components:
       bearerFormat: JWT
 
 tags:
-  - name: Users
-    description: Operations related to users.
   - name: Auth
     description: Operations for signing up and logging in.
+  - name: Users
+    description: Operations related to users.
+  - name: Item Categories
+    description: Operations related to item categories.
 
 paths:
   /auth/create-user:
@@ -279,8 +331,7 @@ paths:
           description: Number of users to skip in response. Used for pagination.
           schema: {
             "type": "number",
-            "minimum": 0,
-            "example": 10
+            "minimum": 0
           }
           required: false
         - name: limit
@@ -288,8 +339,7 @@ paths:
           description: Number of users in one response. Used for pagination. -1 indicates infinite responses.
           schema: {
             "type": "number",
-            "minimum": -1,
-            "example": 5
+            "minimum": -1
           }
           required: false
         - name: searchBy
@@ -297,16 +347,14 @@ paths:
           description: Field to search by. Can use 'realName' to search both first and last name.
           schema: {
             "type": "string",
-            "example": "realName",
-            "enum": [ "username", "firstName", "lastName", "realName" ]
+            "enum": [ "username", "firstName", "lastName", "realName", "createdBy" ]
           }
           required: false
         - name: search
           in: query
           description: Text to search for. Defaults to searching the user's first and last name but 'searchBy' can be used to search other fields.
           schema: {
-            "type": "string",
-            "example": "John Doe"
+            "type": "string"
           }
           required: false
         - name: orderBy
@@ -314,7 +362,6 @@ paths:
           description: Field to sort results by. Defaults to 'id'.
           schema: {
             "type": "string",
-            "example": "realName",
             "enum": [ "id", "username", "firstName", "lastName", "createdBy", "createdAt" ]
           }
           required: false
@@ -323,7 +370,6 @@ paths:
           description: Order to sort results in. Ascending ('asc', low-to-high) or descending ('desc', high-to-low). Defaults to ascending.
           schema: {
             "type": "string",
-            "example": "realName",
             "enum": [ "asc", "desc" ]
           }
           required: false
@@ -331,7 +377,7 @@ paths:
         - bearerAuth: [ ]
       responses:
         "200":
-          description: A list of blogs
+          description: A list of users.
           content:
             application/json:
               schema: {
@@ -395,4 +441,171 @@ paths:
           $ref: "#/components/responses/MissingPermission"
         "404":
           $ref: "#/components/responses/ResourceNotFound"
-        
+  /item-categories:
+    get:
+      summary: Get all categories.
+      description: Retrieve a list of all item categories.
+      tags: [ Item Categories ]
+      parameters:
+        - name: offset
+          in: query
+          description: Number of categories to skip in response. Used for pagination.
+          schema: {
+            "type": "number",
+            "minimum": 0
+          }
+          required: false
+        - name: limit
+          in: query
+          description: Number of categories in one response. Used for pagination. -1 indicates infinite responses.
+          schema: {
+            "type": "number",
+            "minimum": -1
+          }
+          required: false
+        - name: searchBy
+          in: query
+          description: Field to search by.
+          schema: {
+            "type": "string",
+            "enum": [ "name", "parent", "createdBy" ]
+          }
+          required: false
+        - name: search
+          in: query
+          description: Text to search for. Defaults to searching the category name but 'searchBy' can be used to search other fields.
+          schema: {
+            "type": "string"
+          }
+          required: false
+        - name: orderBy
+          in: query
+          description: Field to sort results by. Defaults to 'id'.
+          schema: {
+            "type": "string",
+            "enum": [ "id", "name", "parent", "createdBy", "createdAt" ]
+          }
+          required: false
+        - name: sort
+          in: query
+          description: Order to sort results in. Ascending ('asc', low-to-high) or descending ('desc', high-to-low). Defaults to ascending.
+          schema: {
+            "type": "string",
+            "enum": [ "asc", "desc" ]
+          }
+          required: false
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: A list of item categories.
+          content:
+            application/json:
+              schema: {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ItemCategory"
+                }
+              }
+        "400":
+          $ref: "#/components/responses/InvalidUserInput"
+    post:
+      summary: Create an item category.
+      description: Create a new item category.
+      tags: [ Item Categories ]
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: Information about the new category.
+        required: true
+        content:
+          application/json:
+            schema: {
+              "$ref": "#/components/schemas/ItemCategory"
+            }
+      responses:
+        "201":
+          description: Item category created.
+          content:
+            application/json:
+              schema: {
+                "$ref": "#/components/schemas/ItemCategory"
+              }
+        "400":
+          $ref: "#/components/responses/InvalidUserInput"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+        "403":
+          $ref: "#/components/responses/MissingPermission"
+  /item-categories/{id}:
+    get:
+      summary: Get one item category.
+      description: Get an item category by its primary key.
+      tags: [ Item Categories ]
+      parameters:
+        - $ref: "#/components/parameters/ItemCategoryId"
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: Item category found successfully.
+          content:
+            application/json:
+              schema: {
+                "$ref": "#/components/schemas/ItemCategory"
+              }
+        "400":
+          $ref: "#/components/responses/InvalidResourceID"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+    patch:
+      summary: Update item category info.
+      description: Update basic information about an item category.
+      tags: [ Item Categories ]
+      parameters:
+        - $ref: "#/components/parameters/ItemCategoryId"
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: The properties to update on the category.
+        required: true
+        content:
+          application/json:
+            schema: {
+              "$ref": "#/components/schemas/ItemCategory"
+            }
+      responses:
+        "200":
+          description: Item category found and updated successfully.
+          content:
+            application/json:
+              schema: {
+                "$ref": "#/components/schemas/ItemCategory"
+              }
+        "400":
+          $ref: "#/components/responses/InvalidUserInput"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+        "403":
+          $ref: "#/components/responses/MissingPermission"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+    delete:
+      summary: Delete an item category.
+      description: Delete an item category by its primary key and all it's children.
+      tags: [ Item Categories ]
+      parameters:
+        - $ref: "#/components/parameters/ItemCategoryId"
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "204":
+          description: Item category deleted successfully.
+        "400":
+          $ref: "#/components/responses/InvalidResourceID"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+        "403":
+          $ref: "#/components/responses/MissingPermission"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"

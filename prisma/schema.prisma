@@ -25,7 +25,7 @@ model User {
 	firstName			String			@map("first_name")
 	lastName			String			@map("last_name")
 	createdByUserId		Int? 			@map("created_by")
-	createdBy			User?			@relation("UserCreator", fields: [ createdByUserId ], references: [ id ])
+	createdBy			User?			@relation("UserCreator", fields: [ createdByUserId ], references: [ id ], onDelete: SetNull, onUpdate: Cascade)
 	users 				User[] 			@relation("UserCreator")
 	createdAt			DateTime		@map("created_at")
 	role				PermissionLevel @map("role") @default(read)
@@ -43,8 +43,10 @@ model Item {
 	name				String
 	description			String
 	createdByUserId		Int? 			@map("created_by")
-	createdBy			User?			@relation(fields: [ createdByUserId ], references: [ id ])
+	createdBy			User?			@relation(fields: [ createdByUserId ], references: [ id ], onDelete: SetNull, onUpdate: Cascade)
 	createdAt			DateTime		@map("created_at")
+	categoryId			Int				@map("category")
+	category			ItemCategory	@relation(fields: [ categoryId ], references: [ id ], onDelete: Restrict, onUpdate: Cascade)
 
 	stockItems			StockItem[]
 
@@ -55,12 +57,14 @@ model Item {
 model ItemCategory {
 	id					Int				@id @default(autoincrement())
 	name				String
-	parentId			Int				@map("parent")
-	parent				ItemCategory?	@relation("CategoryParent", fields: [ parentId ], references: [ id ])
+	parentId			Int?			@map("parent")
+	parent				ItemCategory?	@relation("CategoryParent", fields: [ parentId ], references: [ id ], onDelete: Cascade, onUpdate: Cascade)
 	children			ItemCategory[] 	@relation("CategoryParent")
 	createdByUserId		Int? 			@map("created_by")
-	createdBy			User?			@relation(fields: [ createdByUserId ], references: [ id ])
+	createdBy			User?			@relation(fields: [ createdByUserId ], references: [ id ], onDelete: SetNull, onUpdate: Cascade)
 	createdAt			DateTime		@map("created_at")
+
+	items				Item[]
 
 	@@index(fields: [ name ])
 	@@index(fields: [ parentId ])
@@ -70,14 +74,14 @@ model ItemCategory {
 model StockItem {
 	id					Int				@id @default(autoincrement())
 	itemId				Int
-	item				Item			@relation(fields: [ itemId ], references: [ id ])
+	item				Item			@relation(fields: [ itemId ], references: [ id ], onDelete: Cascade, onUpdate: Cascade)
 	quantity			Decimal
 	manufacturer		String?
 	vendor				String?
 	url					String?
 	location			String
 	createdByUserId		Int? 			@map("created_by")
-	createdBy			User?			@relation(fields: [ createdByUserId ], references: [ id ])
+	createdBy			User?			@relation(fields: [ createdByUserId ], references: [ id ], onDelete: SetNull, onUpdate: Cascade)
 	createdAt			DateTime		@map("created_at")
 
 	records				StockItemRecord[]
@@ -89,12 +93,12 @@ model StockItem {
 model StockItemRecord {
 	id					Int				@id @default(autoincrement())
 	stockItemId			Int				@map("stock_item")
-	stockItem			StockItem		@relation(fields: [ stockItemId ], references: [ id ])
+	stockItem			StockItem		@relation(fields: [ stockItemId ], references: [ id ], onDelete: Cascade, onUpdate: Cascade)
 	fieldId				Int				@map("field_id")
 	description			String
 	oldValue			String			@map("old_value")
 	userId				Int?			@map("user_id")
-	user				User?			@relation(fields: [ userId ], references: [ id ])
+	user				User?			@relation(fields: [ userId ], references: [ id ], onDelete: SetNull, onUpdate: Cascade)
 	timestamp			DateTime
 
 	@@index(fields: [ stockItemId ])
