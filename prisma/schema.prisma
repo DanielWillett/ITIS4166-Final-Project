@@ -63,7 +63,7 @@ model ItemCategory {
 	createdByUserId		Int? 			@map("created_by")
 	createdBy			User?			@relation(fields: [ createdByUserId ], references: [ id ], onDelete: SetNull, onUpdate: Cascade)
 	createdAt			DateTime		@map("created_at")
-	
+
 	items				Item[]
 
 	@@index(fields: [ name ])
