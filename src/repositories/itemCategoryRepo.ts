@@ -2,7 +2,7 @@ import type { DefaultArgs } from "@prisma/client/runtime/client";
 
 import prisma from '../db.js';
 import type { ItemCategoryQueryOptions } from "../types/itemCategoryQueryOptions.js";
-import type ItemCategory from "../types/ItemCategory.js";
+import type ItemCategory from "../types/itemCategory.js";
 import { Prisma } from "../generated/prisma/index.js";
 import HttpError from "../errors/NotFoundError.js";
 
@@ -20,28 +20,20 @@ export async function readMany(options: ItemCategoryQueryOptions) : Promise<Item
   let conditions : Prisma.ItemCategoryWhereInput = {};
 
   if (options.search) {
-    if (!options.searchBy || options.searchBy === "realName") {
-      // search by real name
-      const nameIndex = options.search.indexOf(" ");
-      if (nameIndex > 0 && nameIndex < options.search.length - 1) {
-        const firstName = options.search.substring(0, nameIndex).trim();
-        const lastName = options.search.substring(nameIndex + 1).trim();
-        conditions.firstName = { contains: firstName, mode: "insensitive" };
-        conditions.lastName = { contains: lastName, mode: "insensitive" };
-      } else {
-        conditions.OR = [
-          { firstName: { contains: options.search, mode: "insensitive" } },
-          { lastName: { contains: options.search, mode: "insensitive" } }
-        ];
-      }
+    if (!options.searchBy) {
+      conditions.name = { contains: options.search, mode: "insensitive" };
     }
-    else if (options.searchBy === "createdBy") {
-      // search by creating ItemCategory
-      const createdById = parseInt(options.search);
-      if (!isNaN(createdById)) {
-        conditions.createdByItemCategoryId = createdById;
+    else if (options.searchBy === "createdBy" || options.searchBy === "parent") {
+      // search by creating User or parent category
+      const id = parseInt(options.search);
+      if (!isNaN(id)) {
+        if (options.searchBy === "createdBy") {
+          conditions.createdByUserId = id;
+        } else {
+          conditions.parentId = id;
+        }
       } else {
-        throw new HttpError("Expected integer value for createdBy search parameter.", 400);
+        throw new HttpError(`Expected integer value for ${options.searchBy} search parameter.`, 400);
       }
     } else {
       // search by other field
@@ -50,8 +42,7 @@ export async function readMany(options: ItemCategoryQueryOptions) : Promise<Item
   }
 
   let query: Prisma.ItemCategoryFindManyArgs<DefaultArgs> = {
-    where: conditions,
-    omit: { passwordHash: true }
+    where: conditions
   };
 
   if (options.orderBy) {
@@ -65,7 +56,7 @@ export async function readMany(options: ItemCategoryQueryOptions) : Promise<Item
     query.skip = options.offset;
   }
 
-  const models = await prisma.ItemCategory.findMany(query);
+  const models = await prisma.itemCategory.findMany(query);
   return models.map(createItemCategoryFromModel);
 };
 
@@ -90,39 +81,25 @@ export async function readById(id: number) : Promise<ItemCategory | null> {
  */
 export async function create(category: ItemCategory) : Promise<ItemCategory> {
   try {
-    const u = await prisma.itemCategory.create({
+    const model = await prisma.itemCategory.create({
       data: {
         createdAt: category.createdAt,
-        firstName: category.firstName,
-        lastName: category.lastName,
-        ItemCategoryname: category.ItemCategoryname,
-        createdByItemCategoryId: category.createdById,
-        role: category.role
+        name: category.name,
+        createdByUserId: category.createdById,
+        parentId: category.parentId
       }
     });
 
-    return {
-      id: u.id,
-      createdAt: u.createdAt,
-      firstName: u.firstName,
-      lastName: u.lastName,
-      ItemCategoryname: u.ItemCategoryname,
-      createdById: u.createdByItemCategoryId,
-      role: u.role
-    };
+    return createItemCategoryFromModel(model);
 
   } catch (err) {
     if (!(err instanceof Prisma.PrismaClientKnownRequestError)) {
       throw err;
     }
 
-    if (err.code === "P2002") {
-      // unique constraint error
-      throw new HttpError("ItemCategoryname already used.", 409);
-    }
-    else if (err.code === "P2004") {
+    if (err.code === "P2004") {
       // constraint error
-      throw new HttpError("Invalid createdBy ItemCategory ID.", 400);
+      throw new HttpError("Invalid createdBy User ID.", 400);
     }
     else {
       throw err;
@@ -131,23 +108,25 @@ export async function create(category: ItemCategory) : Promise<ItemCategory> {
   }
 };
 
-export async function update(ItemCategoryId: number, update: CategoryUpdateParameters) : Promise<ItemCategory | null> {
+/**
+ * Update properties in a category.
+ * @param categoryId Primary key of the category to update.
+ * @param update Properties to update.
+ * @returns The updated category, or null if it couldn't be found.
+ */
+export async function update(categoryId: number, update: CategoryUpdateParameters) : Promise<ItemCategory | null> {
   try {
     let updateData : Prisma.ItemCategoryUpdateInput = { };
-    if (update.firstName !== undefined) {
-      updateData.firstName = update.firstName;
+    if (update.name !== undefined) {
+      updateData.name = update.name;
     }
-    if (update.lastName !== undefined) {
-      updateData.lastName = update.lastName;
-    }
-    if (update.role !== undefined) {
-      updateData.role = update.role;
+    if (update.parent !== undefined) {
+      updateData.parent = update.parent === null ? { disconnect: true } : { connect: { id: update.parent } };
     }
     
-    const model = await prisma.ItemCategory.update({
-      where: { id: ItemCategoryId },
-      data: updateData,
-      omit: { passwordHash: true }
+    const model = await prisma.itemCategory.update({
+      where: { id: categoryId },
+      data: updateData
     });
 
     return createItemCategoryFromModel(model);
@@ -162,14 +141,22 @@ export async function update(ItemCategoryId: number, update: CategoryUpdateParam
   }
 }
 
-function createItemCategoryFromModel(u: any) : ItemCategory {
+/**
+ * Delete a category and all it's children.
+ * @param userId Primary key of the category to delete.
+ * @returns Whether or not the category was found and deleted.
+ */
+export async function remove(categoryId: number) : Promise<boolean> {
+  const { count } = await prisma.itemCategory.deleteMany({ where: { id: categoryId } });
+  return count > 0;
+};
+
+function createItemCategoryFromModel(model: any) : ItemCategory {
   return {
-      id: u.id,
-      firstName: u.firstName,
-      lastName: u.lastName,
-      ItemCategoryname: u.ItemCategoryname,
-      createdById: u.createdByItemCategoryId,
-      createdAt: u.createdAt,
-      role: u.role
+      id: model.id,
+      name: model.name,
+      parentId: model.parentId,
+      createdById: model.createdByUserId,
+      createdAt: model.createdAt
   };
 }

@@ -10,8 +10,8 @@ export function getCategories(options: ItemCategoryQueryOptions) : Promise<ItemC
     return repo.readMany(options);
 };
 
-export function createCategory(category: ItemCategory, passwordHash: string) : Promise<ItemCategory> {
-    return repo.create(category, passwordHash);
+export function createCategory(category: ItemCategory) : Promise<ItemCategory> {
+    return repo.create(category);
 };
 
 export function updateCategory(categoryId: number, update: repo.CategoryUpdateParameters) : Promise<ItemCategory | null> {
@@ -19,5 +19,5 @@ export function updateCategory(categoryId: number, update: repo.CategoryUpdatePa
 };
 
 export function deleteCategory(categoryId: number) : Promise<boolean> {
-    return repo.delete(categoryId);
+    return repo.remove(categoryId);
 }

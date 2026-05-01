@@ -43,6 +43,10 @@ components:
           "minimum": 1,
           "example": "2026-10-05T14:48:00.000Z",
           "readOnly": true
+        },
+        "role": {
+          "type": "string",
+          "enum": [ "read", "write", "admin" ]
         }
       }
     }
@@ -60,6 +64,14 @@ components:
         "username": {
           "type": "string",
           "example": "username123"
+        },
+        "password": {
+          "type": "string",
+          "example": "password123"
+        },
+        "role": {
+          "type": "string",
+          "enum": [ "read", "write", "admin" ]
         }
       }
     }
@@ -319,8 +331,7 @@ paths:
           description: Number of users to skip in response. Used for pagination.
           schema: {
             "type": "number",
-            "minimum": 0,
-            "example": 0
+            "minimum": 0
           }
           required: false
         - name: limit
@@ -328,8 +339,7 @@ paths:
           description: Number of users in one response. Used for pagination. -1 indicates infinite responses.
           schema: {
             "type": "number",
-            "minimum": -1,
-            "example": -1
+            "minimum": -1
           }
           required: false
         - name: searchBy
@@ -337,7 +347,6 @@ paths:
           description: Field to search by. Can use 'realName' to search both first and last name.
           schema: {
             "type": "string",
-            "example": "realName",
             "enum": [ "username", "firstName", "lastName", "realName", "createdBy" ]
           }
           required: false
@@ -345,8 +354,7 @@ paths:
           in: query
           description: Text to search for. Defaults to searching the user's first and last name but 'searchBy' can be used to search other fields.
           schema: {
-            "type": "string",
-            "example": "John Doe"
+            "type": "string"
           }
           required: false
         - name: orderBy
@@ -354,7 +362,6 @@ paths:
           description: Field to sort results by. Defaults to 'id'.
           schema: {
             "type": "string",
-            "example": "id",
             "enum": [ "id", "username", "firstName", "lastName", "createdBy", "createdAt" ]
           }
           required: false
@@ -363,7 +370,6 @@ paths:
           description: Order to sort results in. Ascending ('asc', low-to-high) or descending ('desc', high-to-low). Defaults to ascending.
           schema: {
             "type": "string",
-            "example": "asc",
             "enum": [ "asc", "desc" ]
           }
           required: false
@@ -446,8 +452,7 @@ paths:
           description: Number of categories to skip in response. Used for pagination.
           schema: {
             "type": "number",
-            "minimum": 0,
-            "example": 0
+            "minimum": 0
           }
           required: false
         - name: limit
@@ -455,8 +460,7 @@ paths:
           description: Number of categories in one response. Used for pagination. -1 indicates infinite responses.
           schema: {
             "type": "number",
-            "minimum": -1,
-            "example": -1
+            "minimum": -1
           }
           required: false
         - name: searchBy
@@ -464,7 +468,6 @@ paths:
           description: Field to search by.
           schema: {
             "type": "string",
-            "example": "name",
             "enum": [ "name", "parent", "createdBy" ]
           }
           required: false
@@ -472,8 +475,7 @@ paths:
           in: query
           description: Text to search for. Defaults to searching the category name but 'searchBy' can be used to search other fields.
           schema: {
-            "type": "string",
-            "example": "Hardware"
+            "type": "string"
           }
           required: false
         - name: orderBy
@@ -481,7 +483,6 @@ paths:
           description: Field to sort results by. Defaults to 'id'.
           schema: {
             "type": "string",
-            "example": "id",
             "enum": [ "id", "name", "parent", "createdBy", "createdAt" ]
           }
           required: false
@@ -490,7 +491,6 @@ paths:
           description: Order to sort results in. Ascending ('asc', low-to-high) or descending ('desc', high-to-low). Defaults to ascending.
           schema: {
             "type": "string",
-            "example": "asc",
             "enum": [ "asc", "desc" ]
           }
           required: false

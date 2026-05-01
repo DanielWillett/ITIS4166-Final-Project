@@ -120,15 +120,7 @@ export async function create(user: User, passwordHash: string) : Promise<User> {
       omit: { passwordHash: true }
     });
 
-    return {
-      id: u.id,
-      createdAt: u.createdAt,
-      firstName: u.firstName,
-      lastName: u.lastName,
-      username: u.username,
-      createdById: u.createdByUserId,
-      role: u.role
-    };
+    return createUserFromModel(u);
 
   } catch (err) {
     if (!(err instanceof Prisma.PrismaClientKnownRequestError)) {
@@ -150,6 +142,12 @@ export async function create(user: User, passwordHash: string) : Promise<User> {
   }
 };
 
+/**
+ * Update properties in a user.
+ * @param categoryId Primary key of the user to update.
+ * @param update Properties to update.
+ * @returns The updated user, or null if it couldn't be found.
+ */
 export async function update(userId: number, update: UserUpdateParameters) : Promise<User | null> {
   try {
     let updateData : Prisma.UserUpdateInput = { };
@@ -179,7 +177,17 @@ export async function update(userId: number, update: UserUpdateParameters) : Pro
     // P2025 = not found error
     return null;
   }
-}
+};
+
+/**
+ * Delete a user.
+ * @param userId Primary key of the user to delete.
+ * @returns Whether or not the user was found and deleted.
+ */
+export async function remove(userId: number) : Promise<boolean> {
+  const { count } = await prisma.user.deleteMany({ where: { id: userId } });
+  return count > 0;
+};
 
 function createUserFromModel(u: any) : User {
   return {

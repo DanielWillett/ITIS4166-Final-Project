@@ -8,6 +8,7 @@ import HttpError from "./errors/NotFoundError.js";
 // routes
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import categoryRoutes from "./routes/itemCategoryRoutes.js";
 
 const app = express();
 const PORT : number = parseInt(process.env.PORT ?? "3000");
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use("/api-docs", swagger.serve, swagger.setup(specs!));
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/item-categories", categoryRoutes);
 
 // throw not found error if route not matched
 app.use((_, __, next) => {
