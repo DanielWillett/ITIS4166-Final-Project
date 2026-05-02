@@ -1,6 +1,8 @@
 # Testing Plan
 Provides steps to use for grading.
 
+**First, switch the server to the production server in Swagger UI.**
+
 ## Auth
 Authentication consists of logging in and creating a new user.
 
@@ -983,7 +985,7 @@ Non-existant ID
 
 ### Remove: `DELETE /item-categories/<id>`
 
-Removes an item category and all it's stock items.
+Removes an item category and all it's children.
 
 > [!IMPORTANT]
 > Requires administrator permissions or to be ran on an object created by the currently logged in user that has write access.
@@ -1023,5 +1025,489 @@ Non-existant ID
 // DELETE /item-categories/4166 -> 404 Not Found
 {
   "error": "Item category 4166 not found."
+}
+```
+
+
+
+
+
+
+
+
+
+## Stock Items
+CRUD operations for stock items.
+
+Stock items represent a physical group of items from one vendor. They also store the physical location of the item.
+
+> [!NOTE]
+> All endpoints require an authentication token.
+
+### Stock Item Model
+```ts
+id: number,
+item: number, // FK to Item
+quantity: number,
+manufacturer: string | null,
+vendor: string | null,
+url: string | null,
+location: string,
+createdBy: number | null, // FK to User
+createdAt: Date
+```
+
+### List: `GET /stock-items`
+
+Queries the list of all stock items.
+
+#### URL Query Parameters
+
+| Parameter  | Type                 | Description                                 |
+| ---------- | -------------------- | ------------------------------------------- |
+| `offset`   | int >= 0             | Pagination offset.                          |
+| `limit`    | int >= -1            | Page size, or -1 for infinte.               |
+| `searchBy` | string or "realName" | Property to search by.                      |
+| `search`   | string               | Text to search for within `searchBy` value. |
+| `orderBy`  | string               | Property to order results by.               |
+| `sort`     | asc \| desc          | Ascending or descending.                    |
+
+#### Responses
+Successes
+```jsonc
+// GET /stock-items -> 200 OK
+[
+  {
+    "id": 1,
+    "item": 1,
+    "quantity": "495",
+    "manufacturer": "Kanebridge",
+    "vendor": "DigiKey",
+    "url": "https://www.digikey.com/en/products/detail/fix-supply/5032BHH7/21649245",
+    "location": "Bldg 1A, Room 114, Shelf 3",
+    "createdAt": "2026-05-01T22:55:34.982Z",
+    "createdBy": 1
+  },
+  {
+    "id": 2,
+    "item": 1,
+    "quantity": "11",
+    "manufacturer": "Generic",
+    "vendor": "Amazon",
+    "url": "https://www.amazon.com/Heavy-Bolt-Grade-Plain-ECS-5032BHH7/dp/B0CVNLHBY6",
+    "location": "Bldg 1A, Room 120, Desk 4",
+    "createdAt": "2026-05-01T22:55:58.019Z",
+    "createdBy": 1
+  },
+  {
+    "id": 3,
+    "item": 2,
+    "quantity": "6",
+    "manufacturer": null,
+    "vendor": "Walmart",
+    "url": null,
+    "location": "Bldg 1A, Room 11",
+    "createdAt": "2026-05-01T22:44:12.684Z",
+    "createdBy": 2
+  }
+]
+```
+
+> [!NOTE]
+> Feel free to try searching, sorting, or paginating with the query parameters but it's too much to put in here for each endpoint. 
+
+Formatting issues
+```jsonc
+// GET /stock-items?orderBy=vendor&sort=1234 -> 400 Bad Request
+{
+  "errors": [
+    "'sort' parameter must be either 'asc' or 'desc'."
+  ]
+}
+```
+Not logged in
+```jsonc
+// GET /stock-items -> 401 Unauthorized
+{
+  "error": "Unable to authenticate, missing bearer token."
+}
+```
+
+### Create: `POST /stock-items`
+
+Creates a new stock item.
+
+> [!IMPORTANT]
+> Requires write access.
+
+#### Body
+```jsonc
+{
+  "item": 1,
+  "quantity": 86,
+  "manufacturer": "CDE Fasteners",
+  "vendor": "CDE Fasteners",
+  "url": "https://cdefasteners.com/order-online/heavy-hex-bolt-grade-b7-astm-a193-plain/476910",
+  "location": "Rob's desk (again)"
+}
+```
+
+Creating a stock item will also add a Stock Item Record for its creation.
+
+#### Responses
+
+Success
+```jsonc
+// POST /stock-items -> 201 Created
+{
+  "id": 4,
+  "item": 1,
+  "quantity": "86",
+  "manufacturer": "CDE Fasteners",
+  "vendor": "CDE Fasteners",
+  "url": "https://cdefasteners.com/order-online/heavy-hex-bolt-grade-b7-astm-a193-plain/476910",
+  "location": "Rob's desk (again)",
+  "createdAt": "2026-05-02T01:22:30.345Z",
+  "createdBy": 1
+}
+```
+Missing/invalid properties or invalid ID
+```jsonc
+// POST /stock-items -> 400 Bad Request
+{
+  "errors": [
+    "'location' parameter is required."
+  ]
+}
+```
+Not logged in
+```jsonc
+// POST /stock-items -> 401 Unauthorized
+{
+  "error": "Unable to authenticate, missing bearer token."
+}
+```
+Missing write permission
+```jsonc
+// POST /stock-items -> 403 Forbidden
+{
+  "error": "Unauthorized, requires write access."
+}
+```
+
+### Read: `GET /stock-items/<id>`
+
+Queries a specific stock item by its ID.
+
+#### Responses
+
+Success
+```jsonc
+// GET /stock-items/1 -> 200 OK
+{
+  "id": 1,
+  "item": 1,
+  "quantity": "495",
+  "manufacturer": "Kanebridge",
+  "vendor": "DigiKey",
+  "url": "https://www.digikey.com/en/products/detail/fix-supply/5032BHH7/21649245",
+  "location": "Bldg 1A, Room 114, Shelf 3",
+  "createdAt": "2026-05-01T22:55:34.982Z",
+  "createdBy": 1
+}
+```
+Invalid ID
+```jsonc
+// GET /stock-items/abc -> 400 Bad Request
+{
+  "errors": [
+    "'id' parameter must be an integer >= 1."
+  ]
+}
+```
+Not logged in
+```jsonc
+// GET /stock-items/1 -> 401 Unauthorized
+{
+  "error": "Unable to authenticate, missing bearer token."
+}
+```
+Non-existant ID
+```jsonc
+// GET /stock-items/4166 -> 404 Not Found
+{
+  "error": "Stock Item 4166 not found."
+}
+```
+
+### Update: `PATCH /stock-items/<id>`
+
+Updates information about a specific stock item by its ID, returning the updated object.
+
+> [!IMPORTANT]
+> Requires administrator permissions or to be ran on an object created by the currently logged in user that has write access.
+
+#### Body
+Include one or more of the following:
+```jsonc
+{
+  "quantity": 14,
+  "manufacturer": "3M",
+  "vendor": "DigiKey",
+  "url": "https://www.digikey.com/en/products/detail/panduit-corp/S1224-C/4578558",
+  "location": "John took it home again"
+}
+```
+
+Modifying a stock item will also add a Stock Item Record for each property changed.
+
+#### Responses
+
+Success
+```jsonc
+// PATCH /stock-items/2 -> 200 OK
+{
+  "id": 2,
+  "item": 1,
+  "quantity": "14",
+  "manufacturer": "3M",
+  "vendor": "DigiKey",
+  "url": "https://www.digikey.com/en/products/detail/panduit-corp/S1224-C/4578558",
+  "location": "John took it home again",
+  "createdAt": "2026-05-01T22:55:58.019Z",
+  "createdBy": 1
+}
+```
+Missing/invalid properties or invalid ID
+```jsonc
+// PATCH /stock-items/2 -> 400 Bad Request
+{
+  "errors": [
+    "At least one of the following fields must be updated: [ quantity, manufacturer, vendor, url, location ]."
+  ]
+}
+```
+Not logged in
+```jsonc
+// PATCH /stock-items/2 -> 401 Unauthorized
+{
+  "error": "Unable to authenticate, missing bearer token."
+}
+```
+Not administrator or self
+```jsonc
+// PATCH /stock-items/2 -> 403 Forbidden
+{
+  "error": "Unauthorized, requires administrator access or ownership of resource."
+}
+```
+Non-existant ID
+```jsonc
+// PATCH /stock-items/4166 -> 404 Not Found
+{
+  "error": "Stock Item 4166 not found."
+}
+```
+
+### Remove: `DELETE /stock-items/<id>`
+
+Removes a stock item and all its records.
+
+> [!IMPORTANT]
+> Requires administrator permissions or to be ran on an object created by the currently logged in user that has write access.
+
+#### Responses
+
+Success
+```jsonc
+// DELETE /stock-items/3 -> 204 No Content
+// (no response)
+```
+Invalid ID
+```jsonc
+// DELETE /stock-items/abc -> 400 Bad Request
+{
+  "errors": [
+    "'id' parameter must be an integer >= 1."
+  ]
+}
+```
+Not logged in
+```jsonc
+// DELETE /stock-items/3 -> 401 Unauthorized
+{
+  "error": "Unable to authenticate, missing bearer token."
+}
+```
+Not administrator or self
+```jsonc
+// DELETE /stock-items/3 -> 403 Forbidden
+{
+  "error": "Unauthorized, requires administrator access or ownership of resource."
+}
+```
+Non-existant ID
+```jsonc
+// DELETE /stock-items/4166 -> 404 Not Found
+{
+  "error": "Stock Item 4166 not found."
+}
+```
+
+
+
+
+
+
+
+
+
+## Stock Item Records
+Read operations for stock item records.
+
+Stock item records record changes to stock items. They are automatically created so they're read-only from the API.
+
+> [!NOTE]
+> All endpoints require an authentication token.
+
+### Stock Item Record Model
+```ts
+id: number,
+stockItem: number, // FK to StockItem
+fieldId: number,  // 0=initial-creation, 1=quantity, 2=manufacturer, 3=vendor, 4=url, 5=location
+description: string,
+oldValue: string,
+user: number | null, // FK to User
+timestamp: Date
+```
+
+### List: `GET /stock-item-records`
+
+Queries the list of all stock items.
+
+#### URL Query Parameters
+
+| Parameter  | Type                 | Description                                 |
+| ---------- | -------------------- | ------------------------------------------- |
+| `offset`   | int >= 0             | Pagination offset.                          |
+| `limit`    | int >= -1            | Page size, or -1 for infinte.               |
+| `searchBy` | string or "realName" | Property to search by.                      |
+| `search`   | string               | Text to search for within `searchBy` value. |
+| `orderBy`  | string               | Property to order results by.               |
+| `sort`     | asc \| desc          | Ascending or descending.                    |
+
+#### Responses
+Successes
+```jsonc
+// GET /stock-item-records -> 200 OK
+[
+  {
+    "id": 1,
+    "stockItem": 1,
+    "fieldId": 0,
+    "description": "Created",
+    "oldValue": "",
+    "user": 1,
+    "timestamp": "2026-05-01T22:55:34.982Z"
+  },
+  {
+    "id": 2,
+    "stockItem": 2,
+    "fieldId": 0,
+    "description": "Created",
+    "oldValue": "",
+    "user": 1,
+    "timestamp": "2026-05-01T22:55:58.019Z"
+  },
+  {
+    "id": 3,
+    "stockItem": 2,
+    "fieldId": 1,
+    "description": "Property quantity changed to '11'",
+    "oldValue": "12",
+    "user": 2,
+    "timestamp": "2026-05-01T23:01:12.304Z"
+  },
+  {
+    "id": 4,
+    "stockItem": 3,
+    "fieldId": 0,
+    "description": "Created",
+    "oldValue": "",
+    "user": 2,
+    "timestamp": "2026-05-01T22:44:12.684Z"
+  },
+  {
+    "id": 5,
+    "stockItem": 3,
+    "fieldId": 5,
+    "description": "Property location changed to 'Bldg 1A, Room 11'",
+    "oldValue": "Bldg 1A, Room 4",
+    "user": 1,
+    "timestamp": "2026-05-02T05:04:46.011Z"
+  }
+]
+```
+
+> [!NOTE]
+> Feel free to try searching, sorting, or paginating with the query parameters but it's too much to put in here for each endpoint. 
+
+Formatting issues
+```jsonc
+// GET /stock-item-records?orderBy=fieldId&sort=1234 -> 400 Bad Request
+{
+  "errors": [
+    "'sort' parameter must be either 'asc' or 'desc'."
+  ]
+}
+```
+Not logged in
+```jsonc
+// GET /stock-item-records -> 401 Unauthorized
+{
+  "error": "Unable to authenticate, missing bearer token."
+}
+```
+
+### Read: `GET /stock-item-records/<id>`
+
+Queries a specific stock item by its ID.
+
+#### Responses
+
+Success
+```jsonc
+// GET /stock-item-records/5 -> 200 OK
+{
+  "id": 5,
+  "stockItem": 3,
+  "fieldId": 5,
+  "description": "Property location changed to 'Bldg 1A, Room 11'",
+  "oldValue": "Bldg 1A, Room 4",
+  "user": 1,
+  "timestamp": "2026-05-02T05:04:46.011Z"
+}
+```
+Invalid ID
+```jsonc
+// GET /stock-item-records/abc -> 400 Bad Request
+{
+  "errors": [
+    "'id' parameter must be an integer >= 1."
+  ]
+}
+```
+Not logged in
+```jsonc
+// GET /stock-item-records/5 -> 401 Unauthorized
+{
+  "error": "Unable to authenticate, missing bearer token."
+}
+```
+Non-existant ID
+```jsonc
+// GET /stock-item-records/4166 -> 404 Not Found
+{
+  "error": "Stock Item Record 4166 not found."
 }
 ```

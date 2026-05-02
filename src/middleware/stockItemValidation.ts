@@ -74,7 +74,6 @@ export const validateCreateStockItem =
         .trim()
         .escape()
         .isString()
-        .isURL({ require_valid_protocol: true })
         .withMessage("'url' parameter must be a non-empty string value with a valid URL scheme."),
 
     body("location")
@@ -144,7 +143,6 @@ export const validateUpdateStockItem =
         .trim()
         .escape()
         .isString()
-        .isURL({ require_valid_protocol: true })
         .withMessage("'url' parameter must be a non-empty string value with a valid URL scheme."),
 
     body("location")
