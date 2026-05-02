@@ -27,6 +27,9 @@ app.use("/api/item-categories", categoryRoutes);
 app.use("/api/items", itemRoutes);
 app.use("/api/stock-items", stockItemRoutes);
 app.use("/api/stock-item-records", stockItemRecordRoutes);
+app.get("/health", (_, res) => {
+  res.status(200).json({ status: 'ok' });
+});
 
 // throw not found error if route not matched
 app.use((_, __, next) => {
