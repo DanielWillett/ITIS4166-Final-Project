@@ -2,7 +2,7 @@ export default interface ItemCategory
 {
     id: number,
     name: string,
-    parentId: number | null,
-    createdById: number | null,
+    parent: number | null,
+    createdBy: number | null,
     createdAt: Date
 };

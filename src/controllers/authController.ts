@@ -5,7 +5,7 @@ import HttpError from "../errors/NotFoundError.js";
 
 export async function signUpHandler(req: Request, res: Response) : Promise<void> {
 
-    let role : "read" | "write" | "admin" = req.body.role;
+    let role : "read" | "write" | "admin" = req.body.role ?? "read";
     if (role !== "read") {
         // clamp role to user's role
         if (role === "write") {

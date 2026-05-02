@@ -5,14 +5,16 @@ import { handleValidationErrors } from "./handleValidationErrors.js";
 export const validateLogIn =
 [
     body("username")
-        .optional()
+        .exists({ values: 'falsy' })
+        .withMessage("'username' parameter is required.")
         .trim()
         .escape()
         .isString()
         .withMessage("'username' parameter must be a non-empty string value."),
 
     body("password")
-        .optional()
+        .exists({ values: 'falsy' })
+        .withMessage("'password' parameter is required.")
         .trim()
         .escape()
         .isString()
@@ -24,14 +26,16 @@ export const validateLogIn =
 export const validateCreateUser =
 [
     body("username")
-        .optional()
+        .exists({ values: 'falsy' })
+        .withMessage("'username' parameter is required.")
         .trim()
         .escape()
         .isString()
         .withMessage("'username' parameter must be a non-empty string value."),
 
     body("password")
-        .optional()
+        .exists({ values: 'falsy' })
+        .withMessage("'password' parameter is required.")
         .trim()
         .escape()
         .isString()

@@ -2,7 +2,7 @@ import { body, oneOf, param, query } from "express-validator";
 
 import { handleValidationErrors } from "./handleValidationErrors.js";
 
-export const validateGetAllCategories =
+export const validateGetAllItems =
 [
     query("offset")
         .optional()
@@ -16,8 +16,8 @@ export const validateGetAllCategories =
 
     query("searchBy")
         .optional()
-        .isIn([ "name", "parent", "createdBy" ])
-        .withMessage("'searchBy' parameter must be a valid property: [ name, parent, createdBy ]."),
+        .isIn([ "name", "description", "createdBy", "category" ])
+        .withMessage("'searchBy' parameter must be a valid property: [ name, description, createdBy, category ]."),
         
     query("search")
         .optional()
@@ -29,8 +29,8 @@ export const validateGetAllCategories =
     
     query("orderBy")
         .optional()
-        .isIn([ "id", "name", "parent", "createdBy", "createdAt" ])
-        .withMessage("'orderBy' parameter must be a valid property: [ id, name, parent, createdBy, createdAt ]."),
+        .isIn([ "id", "name", "description", "category", "createdBy", "createdAt" ])
+        .withMessage("'orderBy' parameter must be a valid property: [ id, name, description, category, createdBy, createdAt ]."),
 
     query("sort")
         .optional()
@@ -41,7 +41,7 @@ export const validateGetAllCategories =
     handleValidationErrors
 ];
 
-export const validateCreateCategory =
+export const validateCreateItem =
 [
     body("name")
         .exists({ values: 'falsy' })
@@ -51,15 +51,24 @@ export const validateCreateCategory =
         .isString()
         .withMessage("'name' parameter must be a non-empty string value."),
 
-    body("parent")
-        .optional({ values: "null" })
+    body("description")
+        .exists({ values: 'falsy' })
+        .withMessage("'description' parameter is required.")
+        .trim()
+        .escape()
+        .isString()
+        .withMessage("'description' parameter must be a non-empty string value."),
+
+    body("category")
+        .exists({ values: 'null' })
+        .withMessage("'category' parameter is required.")
         .isInt({ min: 1 })
-        .withMessage("'parent' parameter must be a valid integer if included."),
+        .withMessage("'category' parameter must be a valid integer."),
 
     handleValidationErrors
 ];
 
-export const validateGetCategoryById =
+export const validateGetItemById =
 [
     param("id")
         .trim()
@@ -70,7 +79,7 @@ export const validateGetCategoryById =
     handleValidationErrors
 ];
 
-export const validateUpdateCategory =
+export const validateUpdateItem =
 [
     param("id")
         .trim()
@@ -81,10 +90,11 @@ export const validateUpdateCategory =
     oneOf(
         [
             body("name").exists({ values: "falsy" }),
-            body("parent").exists({ values: "undefined" }),
+            body("description").exists({ values: "falsy" }),
+            body("category").exists({ values: "undefined" }),
         ],
         {
-            message: "At least one of the following fields must be updated: [ name, parent ]."
+            message: "At least one of the following fields must be updated: [ name, description, category ]."
         },
     ),
 
@@ -95,12 +105,19 @@ export const validateUpdateCategory =
         .isString()
         .withMessage("'name' parameter must be a non-empty string value."),
 
-    body("parent")
-        .isInt({ min: 1 })
+    body("description")
+        .optional()
+        .trim()
+        .escape()
+        .isString()
+        .withMessage("'description' parameter must be a non-empty string value."),
+
+    body("category")
         .optional({ values: "null" })
-        .withMessage("'parent' parameter must be a valid integer or 'null'."),
+        .isInt({ min: 1 })
+        .withMessage("'category' parameter must be a valid integer."),
 
     handleValidationErrors
 ];
 
-export const validateDeleteCategory = validateGetCategoryById;
+export const validateDeleteItem = validateGetItemById;

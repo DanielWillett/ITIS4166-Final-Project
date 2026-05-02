@@ -26,7 +26,7 @@ export async function createNewUser(username: string, password: string, firstNam
 
     const user = await users.createUser({
         createdAt: new Date(Date.now()),
-        createdById: createdBy,
+        createdBy: createdBy,
         firstName: firstName,
         lastName: lastName,
         username: username,

@@ -9,6 +9,9 @@ import HttpError from "./errors/NotFoundError.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import categoryRoutes from "./routes/itemCategoryRoutes.js";
+import itemRoutes from "./routes/itemRoutes.js";
+import stockItemRoutes from "./routes/stockItemRoutes.js";
+import stockItemRecordRoutes from "./routes/stockItemRecordRoutes.js";
 
 const app = express();
 const PORT : number = parseInt(process.env.PORT ?? "3000");
@@ -21,6 +24,9 @@ app.use("/api-docs", swagger.serve, swagger.setup(specs!));
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/item-categories", categoryRoutes);
+app.use("/api/items", itemRoutes);
+app.use("/api/stock-items", stockItemRoutes);
+app.use("/api/stock-item-records", stockItemRecordRoutes);
 
 // throw not found error if route not matched
 app.use((_, __, next) => {

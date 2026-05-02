@@ -32,14 +32,15 @@ components:
           "readOnly": true
         },
         "createdById": {
-          "type": [ "number", "null" ],
+          "type": "integer",
+          "nullable": true,
           "minimum": 1,
           "example": 1,
           "readOnly": true
         },
         "createdAt": {
           "type": "string",
-          "format": "date",
+          "format": "date-time",
           "minimum": 1,
           "example": "2026-10-05T14:48:00.000Z",
           "readOnly": true
@@ -92,13 +93,191 @@ components:
           "example": 1
         },
         "createdBy": {
-          "type": [ "integer", "null" ],
+          "type": "integer",
+          "nullable": true,
           "example": 1,
           "readOnly": true
         },
         "createdAt": {
           "type": "string",
-          "format": "date",
+          "format": "date-time",
+          "example": "2026-10-05T14:48:00.000Z",
+          "readOnly": true
+        }
+      }
+    }
+    Item: {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "example": 2,
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "example": "BOLT HEX HEAD HEX SOCKET 1/2\"-13"
+        },
+        "description": {
+          "type": "string",
+          "example": "1/2\"-13 Hex Head Bolt Hex Socket Drive Steel"
+        },
+        "createdBy": {
+          "type": "integer",
+          "nullable": true,
+          "example": 1,
+          "readOnly": true
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2026-10-05T14:48:00.000Z",
+          "readOnly": true
+        },
+        "category": {
+          "type": "integer",
+          "example": 4
+        }
+      }
+    }
+    StockItem: {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "example": 2,
+          "readOnly": true
+        },
+        "item": {
+          "type": "integer",
+          "example": 1
+        },
+        "quantity": {
+          "type": "number",
+          "example": 10.0
+        },
+        "manufacturer": {
+          "type": "string",
+          "nullable": true,
+          "example": "Kanebridge"
+        },
+        "vendor": {
+          "type": "string",
+          "nullable": true,
+          "example": "DigiKey"
+        },
+        "url": {
+          "type": "string",
+          "nullable": true,
+          "example": "https://www.digikey.com/en/products/detail/fix-supply/5032BHH7/21649245",
+          "format": "uri"
+        },
+        "location": {
+          "type": "string",
+          "example": "Bldg 1A, Room 114, Shelf 3"
+        },
+        "createdBy": {
+          "type": "integer",
+          "nullable": true,
+          "example": 1,
+          "readOnly": true
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2026-10-05T14:48:00.000Z",
+          "readOnly": true
+        }
+      }
+    }
+    UpdateStockItem: {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "example": 2,
+          "readOnly": true
+        },
+        "item": {
+          "type": "integer",
+          "example": 1,
+          "readOnly": true
+        },
+        "quantity": {
+          "type": "number",
+          "example": 10.0
+        },
+        "manufacturer": {
+          "type": "string",
+          "nullable": true,
+          "example": "Kanebridge"
+        },
+        "vendor": {
+          "type": "string",
+          "nullable": true,
+          "example": "DigiKey"
+        },
+        "url": {
+          "type": "string",
+          "nullable": true,
+          "example": "https://www.digikey.com/en/products/detail/fix-supply/5032BHH7/21649245",
+          "format": "uri"
+        },
+        "location": {
+          "type": "string",
+          "example": "Bldg 1A, Room 114, Shelf 3"
+        },
+        "createdBy": {
+          "type": "integer",
+          "nullable": true,
+          "example": 1,
+          "readOnly": true
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2026-10-05T14:48:00.000Z",
+          "readOnly": true
+        }
+      }
+    }
+    StockItemRecord: {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "example": 2,
+          "readOnly": true
+        },
+        "stockItem": {
+          "type": "integer",
+          "example": 1,
+          "readOnly": true
+        },
+        "fieldId": {
+          "type": "integer",
+          "example": 4,
+          "readOnly": true
+        },
+        "description": {
+          "type": "string",
+          "example": "Property location changed to 'Bldg 1A, Room 114, Shelf 3'",
+          "readOnly": true
+        },
+        "oldValue": {
+          "type": "string",
+          "example": "Bldg 1A, Room 114, Shelf 2",
+          "readOnly": true
+        },
+        "user": {
+          "type": "integer",
+          "nullable": true,
+          "example": 2,
+          "readOnly": true
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
           "example": "2026-10-05T14:48:00.000Z",
           "readOnly": true
         }
@@ -122,6 +301,33 @@ components:
       schema: {
         "type": "integer",
         "example": 2
+      }
+    ItemId:
+      name: id
+      in: path
+      required: true
+      description: Item ID
+      schema: {
+        "type": "integer",
+        "example": 1
+      }
+    StockItemId:
+      name: id
+      in: path
+      required: true
+      description: Stock Item ID
+      schema: {
+        "type": "integer",
+        "example": 1
+      }
+    StockItemRecordId:
+      name: id
+      in: path
+      required: true
+      description: Stock Item Record ID
+      schema: {
+        "type": "integer",
+        "example": 1
       }
   responses:
     InvalidUserInput:
@@ -216,8 +422,14 @@ tags:
     description: Operations for signing up and logging in.
   - name: Users
     description: Operations related to users.
+  - name: Items
+    description: A generic type of item that can contain multiple stock items.
+  - name: Stock Items
+    description: A specific set of objects in stock for an item.
   - name: Item Categories
     description: Operations related to item categories.
+  - name: Stock Item Records
+    description: Change history from stock items.
 
 paths:
   /auth/create-user:
@@ -306,7 +518,7 @@ paths:
         "400":
           $ref: "#/components/responses/InvalidUserInput"
         "401":
-          description: Username already in use.
+          description: Invalid credentials.
           content:
             application/json:
               schema: {
@@ -347,7 +559,7 @@ paths:
           description: Field to search by. Can use 'realName' to search both first and last name.
           schema: {
             "type": "string",
-            "enum": [ "username", "firstName", "lastName", "realName", "createdBy" ]
+            "enum": [ "username", "firstName", "lastName", "realName", "createdBy", "role" ]
           }
           required: false
         - name: search
@@ -388,6 +600,8 @@ paths:
               }
         "400":
           $ref: "#/components/responses/InvalidUserInput"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
   /users/{id}:
     get:
       summary: Get one user.
@@ -407,6 +621,8 @@ paths:
               }
         "400":
           $ref: "#/components/responses/InvalidResourceID"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
         "404":
           $ref: "#/components/responses/ResourceNotFound"
     patch:
@@ -509,6 +725,8 @@ paths:
               }
         "400":
           $ref: "#/components/responses/InvalidUserInput"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
     post:
       summary: Create an item category.
       description: Create a new item category.
@@ -556,6 +774,8 @@ paths:
               }
         "400":
           $ref: "#/components/responses/InvalidResourceID"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
         "404":
           $ref: "#/components/responses/ResourceNotFound"
     patch:
@@ -609,3 +829,441 @@ paths:
           $ref: "#/components/responses/MissingPermission"
         "404":
           $ref: "#/components/responses/ResourceNotFound"
+  /items:
+    get:
+      summary: Get all items.
+      description: Retrieve a list of all items.
+      tags: [ Items ]
+      parameters:
+        - name: offset
+          in: query
+          description: Number of items to skip in response. Used for pagination.
+          schema: {
+            "type": "number",
+            "minimum": 0
+          }
+          required: false
+        - name: limit
+          in: query
+          description: Number of items in one response. Used for pagination. -1 indicates infinite responses.
+          schema: {
+            "type": "number",
+            "minimum": -1
+          }
+          required: false
+        - name: searchBy
+          in: query
+          description: Field to search by.
+          schema: {
+            "type": "string",
+            "enum": [ "name", "description", "createdBy", "category" ]
+          }
+          required: false
+        - name: search
+          in: query
+          description: Text to search for. Defaults to searching the item name but 'searchBy' can be used to search other fields.
+          schema: {
+            "type": "string"
+          }
+          required: false
+        - name: orderBy
+          in: query
+          description: Field to sort results by. Defaults to 'id'.
+          schema: {
+            "type": "string",
+            "enum": [ "id", "name", "description", "category", "createdBy", "createdAt" ]
+          }
+          required: false
+        - name: sort
+          in: query
+          description: Order to sort results in. Ascending ('asc', low-to-high) or descending ('desc', high-to-low). Defaults to ascending.
+          schema: {
+            "type": "string",
+            "enum": [ "asc", "desc" ]
+          }
+          required: false
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: A list of items.
+          content:
+            application/json:
+              schema: {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+        "400":
+          $ref: "#/components/responses/InvalidUserInput"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+    post:
+      summary: Create an item.
+      description: Create a new item.
+      tags: [ Items ]
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: Information about the item.
+        required: true
+        content:
+          application/json:
+            schema: {
+              "$ref": "#/components/schemas/Item"
+            }
+      responses:
+        "201":
+          description: Item created.
+          content:
+            application/json:
+              schema: {
+                "$ref": "#/components/schemas/Item"
+              }
+        "400":
+          $ref: "#/components/responses/InvalidUserInput"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+        "403":
+          $ref: "#/components/responses/MissingPermission"
+  /items/{id}:
+    get:
+      summary: Get one item.
+      description: Get an item by its primary key.
+      tags: [ Items ]
+      parameters:
+        - $ref: "#/components/parameters/ItemId"
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: Item found successfully.
+          content:
+            application/json:
+              schema: {
+                "$ref": "#/components/schemas/Item"
+              }
+        "400":
+          $ref: "#/components/responses/InvalidResourceID"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+    patch:
+      summary: Update item info.
+      description: Update basic information about an item.
+      tags: [ Items ]
+      parameters:
+        - $ref: "#/components/parameters/ItemId"
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: The properties to update on the item.
+        required: true
+        content:
+          application/json:
+            schema: {
+              "$ref": "#/components/schemas/Item"
+            }
+      responses:
+        "200":
+          description: Item found and updated successfully.
+          content:
+            application/json:
+              schema: {
+                "$ref": "#/components/schemas/Item"
+              }
+        "400":
+          $ref: "#/components/responses/InvalidUserInput"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+        "403":
+          $ref: "#/components/responses/MissingPermission"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+    delete:
+      summary: Delete an item.
+      description: Delete an item by its primary key and all it's stock items.
+      tags: [ Items ]
+      parameters:
+        - $ref: "#/components/parameters/ItemId"
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "204":
+          description: Item deleted successfully.
+        "400":
+          $ref: "#/components/responses/InvalidResourceID"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+        "403":
+          $ref: "#/components/responses/MissingPermission"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+  /stock-items:
+    get:
+      summary: Get all stock items.
+      description: Retrieve a list of all stock items.
+      tags: [ Stock Items ]
+      parameters:
+        - name: offset
+          in: query
+          description: Number of stock items to skip in response. Used for pagination.
+          schema: {
+            "type": "number",
+            "minimum": 0
+          }
+          required: false
+        - name: limit
+          in: query
+          description: Number of stock items in one response. Used for pagination. -1 indicates infinite responses.
+          schema: {
+            "type": "number",
+            "minimum": -1
+          }
+          required: false
+        - name: searchBy
+          in: query
+          description: Field to search by.
+          schema: {
+            "type": "string",
+            "enum": [ "item", "manufacturer", "vendor", "location", "createdBy" ]
+          }
+          required: false
+        - name: search
+          in: query
+          description: Text to search for. Defaults to searching the item primary key but 'searchBy' can be used to search other fields.
+          schema: {
+            "type": "string"
+          }
+          required: false
+        - name: orderBy
+          in: query
+          description: Field to sort results by. Defaults to 'id'.
+          schema: {
+            "type": "string",
+            "enum": [ "id", "item", "quantity", "manufacturer", "vendor", "url", "location", "createdBy", "createdAt" ]
+          }
+          required: false
+        - name: sort
+          in: query
+          description: Order to sort results in. Ascending ('asc', low-to-high) or descending ('desc', high-to-low). Defaults to ascending.
+          schema: {
+            "type": "string",
+            "enum": [ "asc", "desc" ]
+          }
+          required: false
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: A list of stock items.
+          content:
+            application/json:
+              schema: {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/StockItem"
+                }
+              }
+        "400":
+          $ref: "#/components/responses/InvalidUserInput"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+    post:
+      summary: Create a stock item.
+      description: Create a new stock item.
+      tags: [ Stock Items ]
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: Information about the stock item.
+        required: true
+        content:
+          application/json:
+            schema: {
+              "$ref": "#/components/schemas/StockItem"
+            }
+      responses:
+        "201":
+          description: Item created.
+          content:
+            application/json:
+              schema: {
+                "$ref": "#/components/schemas/StockItem"
+              }
+        "400":
+          $ref: "#/components/responses/InvalidUserInput"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+        "403":
+          $ref: "#/components/responses/MissingPermission"
+  /stock-items/{id}:
+    get:
+      summary: Get one stock item.
+      description: Get a stock item by its primary key.
+      tags: [ Stock Items ]
+      parameters:
+        - $ref: "#/components/parameters/StockItemId"
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: Stock item found successfully.
+          content:
+            application/json:
+              schema: {
+                "$ref": "#/components/schemas/StockItem"
+              }
+        "400":
+          $ref: "#/components/responses/InvalidResourceID"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+    patch:
+      summary: Update stock item info.
+      description: Update basic information about a stock item.
+      tags: [ Stock Items ]
+      parameters:
+        - $ref: "#/components/parameters/StockItemId"
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: The properties to update on the stock item.
+        required: true
+        content:
+          application/json:
+            schema: {
+              "$ref": "#/components/schemas/UpdateStockItem"
+            }
+      responses:
+        "200":
+          description: Stock item found and updated successfully.
+          content:
+            application/json:
+              schema: {
+                "$ref": "#/components/schemas/StockItem"
+              }
+        "400":
+          $ref: "#/components/responses/InvalidUserInput"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+        "403":
+          $ref: "#/components/responses/MissingPermission"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+    delete:
+      summary: Delete a stock item.
+      description: Delete a stock item by its primary key and all it's records.
+      tags: [ Stock Items ]
+      parameters:
+        - $ref: "#/components/parameters/StockItemId"
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "204":
+          description: Stock item deleted successfully.
+        "400":
+          $ref: "#/components/responses/InvalidResourceID"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+        "403":
+          $ref: "#/components/responses/MissingPermission"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+  /stock-item-records:
+    get:
+      summary: Get all stock item records.
+      description: Retrieve a list of all stock item records.
+      tags: [ Stock Item Records ]
+      parameters:
+        - name: offset
+          in: query
+          description: Number of records to skip in response. Used for pagination.
+          schema: {
+            "type": "number",
+            "minimum": 0
+          }
+          required: false
+        - name: limit
+          in: query
+          description: Number of records in one response. Used for pagination. -1 indicates infinite responses.
+          schema: {
+            "type": "number",
+            "minimum": -1
+          }
+          required: false
+        - name: searchBy
+          in: query
+          description: Field to search by.
+          schema: {
+            "type": "string",
+            "enum": [ "stockItem", "fieldId", "description", "oldValue", "user" ]
+          }
+          required: false
+        - name: search
+          in: query
+          description: Text to search for. Defaults to searching the the description but 'searchBy' can be used to search other fields.
+          schema: {
+            "type": "string"
+          }
+          required: false
+        - name: orderBy
+          in: query
+          description: Field to sort results by. Defaults to 'id'.
+          schema: {
+            "type": "string",
+            "enum": [ "id", "stockItem", "fieldId", "description", "oldValue", "user", "timestamp" ]
+          }
+          required: false
+        - name: sort
+          in: query
+          description: Order to sort results in. Ascending ('asc', low-to-high) or descending ('desc', high-to-low). Defaults to ascending.
+          schema: {
+            "type": "string",
+            "enum": [ "asc", "desc" ]
+          }
+          required: false
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: A list of stock items records.
+          content:
+            application/json:
+              schema: {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/StockItemRecord"
+                }
+              }
+        "400":
+          $ref: "#/components/responses/InvalidUserInput"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+  /stock-item-records/{id}:
+    get:
+      summary: Get one stock item record.
+      description: Get a stock item record by its primary key.
+      tags: [ Stock Item Records ]
+      parameters:
+        - $ref: "#/components/parameters/StockItemRecordId"
+      security:
+        - bearerAuth: [ ]
+      responses:
+        "200":
+          description: Stock item record found successfully.
+          content:
+            application/json:
+              schema: {
+                "$ref": "#/components/schemas/StockItemRecord"
+              }
+        "400":
+          $ref: "#/components/responses/InvalidResourceID"
+        "401":
+          $ref: "#/components/responses/MissingAuthorization"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+  

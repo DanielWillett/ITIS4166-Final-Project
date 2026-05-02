@@ -4,7 +4,7 @@ export default interface User
     firstName: string,
     lastName: string,
     username: string,
-    createdById: number | null,
+    createdBy: number | null,
     createdAt: Date,
     role: "read" | "write" | "admin"
 };

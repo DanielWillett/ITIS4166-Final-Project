@@ -114,7 +114,7 @@ export async function create(user: User, passwordHash: string) : Promise<User> {
         lastName: user.lastName,
         username: user.username,
         passwordHash: passwordHash,
-        createdByUserId: user.createdById,
+        createdByUserId: user.createdBy,
         role: user.role
       },
       omit: { passwordHash: true }
@@ -195,7 +195,7 @@ function createUserFromModel(u: any) : User {
       firstName: u.firstName,
       lastName: u.lastName,
       username: u.username,
-      createdById: u.createdByUserId,
+      createdBy: u.createdByUserId,
       createdAt: u.createdAt,
       role: u.role
   };

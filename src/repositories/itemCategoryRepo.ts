@@ -85,8 +85,8 @@ export async function create(category: ItemCategory) : Promise<ItemCategory> {
       data: {
         createdAt: category.createdAt,
         name: category.name,
-        createdByUserId: category.createdById,
-        parentId: category.parentId
+        createdByUserId: category.createdBy,
+        parentId: category.parent
       }
     });
 
@@ -143,7 +143,7 @@ export async function update(categoryId: number, update: CategoryUpdateParameter
 
 /**
  * Delete a category and all it's children.
- * @param userId Primary key of the category to delete.
+ * @param categoryId Primary key of the category to delete.
  * @returns Whether or not the category was found and deleted.
  */
 export async function remove(categoryId: number) : Promise<boolean> {
@@ -155,8 +155,8 @@ function createItemCategoryFromModel(model: any) : ItemCategory {
   return {
       id: model.id,
       name: model.name,
-      parentId: model.parentId,
-      createdById: model.createdByUserId,
+      parent: model.parentId,
+      createdBy: model.createdByUserId,
       createdAt: model.createdAt
   };
 }
