@@ -28,6 +28,11 @@ DATABASE_URL=<postgres://.../...>
 JWT_SECRET=<Some binary text>
 ```
 
+Seed database
+```
+npm run seed:dev
+```
+
 Start server
 ```
 npm run dev
