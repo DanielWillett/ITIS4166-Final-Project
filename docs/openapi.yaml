@@ -7,6 +7,9 @@ info:
 
 servers:
   - url: http://localhost:8080/api
+    description: Local development server.
+  - url: https://inventory-service-b4rl.onrender.com/api
+    description: Production server.
 
 components:
   schemas:
